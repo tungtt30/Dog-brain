@@ -1,0 +1,16 @@
+dog-brain/
+│
+├── backend/
+│   ├── app.py
+│   ├── model/
+│   ├── utils/
+│   ├── requirements.txt
+│   └── Dockerfile
+│
+├── frontend/
+│   ├── index.html
+│   ├── script.js
+│   ├── style.css
+│   └── Dockerfile
+│
+└── docker-compose.yml

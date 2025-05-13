@@ -2,17 +2,18 @@
 <html>
   <head>
     <title>ChatBot</title>
-    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="./style.css" />
   </head>
   <body>
     <h1>Chatbot Tài Liệu</h1>
     <input type="file" id="fileInput" />
     <button onclick="upload()">Upload</button>
-    <button onclick="summarize()">Tóm tắt</button>
+    <button onclick="summarize()">Summarize</button>
+    <button onclick="translat()">Translate</button>
     <p id="summary"></p>
-    <input type="text" id="question" placeholder="Hỏi gì đó..." />
-    <button onclick="ask()">Hỏi</button>
+    <input type="text" id="question" placeholder="Input something..." />
+    <button onclick="ask()">Click</button>
     <p id="answer"></p>
-    <script src="script.js"></script>
+    <script src="./script.js"></script>
   </body>
 </html>

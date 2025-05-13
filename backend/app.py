@@ -3,8 +3,12 @@ from flask_cors import CORS
 from utils.file_reader import read_docx
 from model.summarizer import summarize_text
 from model.qa import answer_question
+from model.translate import trans
 
-app = Flask(__name__, static_url_path='/static', static_folder='static', template_folder='templates')
+import sys
+sys.stdout.reconfigure(encoding='utf-8')
+
+app = Flask(__name__, static_url_path='', static_folder='static', template_folder='templates')
 CORS(app)
 
 document_content = ""
@@ -34,6 +38,15 @@ def ask():
     data = request.json
     question = data.get("question", "")
     answer = answer_question(document_content, question)
+    return jsonify({"answer": answer})
+
+@app.route('/trans', methods=['POST'])
+def translate():
+    data = request.json
+    question = data.get("question", "")
+    print("from server" + question)
+    answer = trans(question)
+    print("res: ", answer)
     return jsonify({"answer": answer})
 
 if __name__ == '__main__':

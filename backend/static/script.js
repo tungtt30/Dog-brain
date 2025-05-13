@@ -18,11 +18,11 @@ function summarize() {
         });
 }
 
-function ask() {
+function translat() {
     const question = document.getElementById("question").value;
-    fetch("http://localhost:5000/ask", {
+    fetch("http://localhost:5000/trans", {
         method: "POST",
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json; charset=UTF-8' },
         body: JSON.stringify({ question })
     })
         .then(res => res.json())
@@ -30,3 +30,20 @@ function ask() {
             document.getElementById("answer").innerText = "Answer: " + data.answer;
         });
 }
+
+function ask() {
+    const question = document.getElementById("question").value;
+
+    fetch("http://localhost:5000/ask", {
+        method: "POST",
+        headers: { 'Content-Type': 'application/json; charset=UTF-8' },
+        body: JSON.stringify({ question })
+    })
+        .then(res => res.json())
+        .then(data => {
+            document.getElementById("answer").innerText = "Answer: " + data.answer;
+        });
+}
+
+
+

@@ -1,10 +1,21 @@
-from transformers import BartForConditionalGeneration, BartTokenizer
 import torch
+from transformers import T5Tokenizer, T5ForConditionalGeneration
 
-tokenizer = BartTokenizer.from_pretrained('facebook/bart-large-cnn')
-model = BartForConditionalGeneration.from_pretrained('facebook/bart-large-cnn')
 
-def summarize_text(text, max_length=130, min_length=30):
-    inputs = tokenizer.encode(text, return_tensors='pt', max_length=1024, truncation=True)
-    summary_ids = model.generate(inputs, max_length=max_length, min_length=min_length, length_penalty=2.0, num_beams=4, early_stopping=True)
-    return tokenizer.decode(summary_ids[0], skip_special_tokens=True)
+device = "cuda"
+model_dir = "backend/summ_model"
+tokenizer = T5Tokenizer.from_pretrained(model_dir)
+model = T5ForConditionalGeneration.from_pretrained(model_dir).to(device)
+model.eval()
+
+def summ(input_text = "Không có gì để tóm tắt"):
+    text = input_text + " </s>"
+    inputs = tokenizer(text, return_tensors="pt")
+    input_ids, attention_masks = inputs["input_ids"].to(device), inputs["attention_mask"].to(device)
+    outputs = model.generate(
+        input_ids = input_ids, attention_mask=attention_masks,
+        max_length=512,
+        early_stopping=True
+    )
+    line = tokenizer.decode(outputs[0], skip_special_tokens=True, clean_up_tokenization_spaces=True)
+    return line

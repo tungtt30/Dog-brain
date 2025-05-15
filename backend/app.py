@@ -1,7 +1,7 @@
 from flask import Flask, request, jsonify, render_template
 from flask_cors import CORS
 from utils.file_reader import read_docx
-from model.summarizer import summarize_text
+from model.summarizer import summ
 from model.qa import answer_question
 from model.translate import trans
 
@@ -26,13 +26,6 @@ def upload_file():
         return jsonify({"message": "File uploaded OK"})
     return jsonify({"error": "Only support file .docx"}), 400
 
-@app.route('/summarize', methods=['GET'])
-def summarize():
-    if not document_content:
-        return jsonify({"error": "Not upload file yet"}), 400
-    summary = summarize_text(document_content)
-    return jsonify({"summary": summary})
-
 @app.route('/ask', methods=['POST'])
 def ask():
     data = request.json
@@ -44,9 +37,18 @@ def ask():
 def translate():
     data = request.json
     question = data.get("question", "")
-    print("from server" + question)
+    # print("from server" + question)
     answer = trans(question)
-    print("res: ", answer)
+    # print("res: ", answer)
+    return jsonify({"answer": answer})
+
+@app.route('/summ', methods=['POST'])
+def summary():
+    data = request.json
+    question = data.get("question", "")
+    # print("from server" + question)
+    answer = summ(question)
+    # print("res: ", answer)
     return jsonify({"answer": answer})
 
 if __name__ == '__main__':

@@ -10,13 +10,7 @@ function upload() {
     }).then(res => res.json()).then(data => alert(data.message));
 }
 
-function summarize() {
-    fetch("http://localhost:5000/summarize")
-        .then(res => res.json())
-        .then(data => {
-            document.getElementById("summary").innerText = "Summary: " + data.summary;
-        });
-}
+
 
 function translat() {
     const question = document.getElementById("question").value;
@@ -27,7 +21,20 @@ function translat() {
     })
         .then(res => res.json())
         .then(data => {
-            document.getElementById("answer").innerText = "Answer: " + data.answer;
+            document.getElementById("answer").innerText = data.answer;
+        });
+}
+
+function summarize() {
+    const question = document.getElementById("question").value;
+    fetch("http://localhost:5000/summ", {
+        method: "POST",
+        headers: { 'Content-Type': 'application/json; charset=UTF-8' },
+        body: JSON.stringify({ question })
+    })
+        .then(res => res.json())
+        .then(data => {
+            document.getElementById("answer").innerText = data.answer;
         });
 }
 
@@ -41,7 +48,7 @@ function ask() {
     })
         .then(res => res.json())
         .then(data => {
-            document.getElementById("answer").innerText = "Answer: " + data.answer;
+            document.getElementById("answer").innerText = data.answer;
         });
 }
 

@@ -3,7 +3,7 @@ from transformers import T5Tokenizer, T5ForConditionalGeneration
 
 
 device = "cuda"
-model_dir = "backend/trans_model"
+model_dir = "backend/models/trans_model"
 tokenizer = T5Tokenizer.from_pretrained(model_dir)
 model = T5ForConditionalGeneration.from_pretrained(model_dir).to(device)
 model.eval()

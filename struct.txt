@@ -2,7 +2,11 @@ dog-brain/
 │
 ├── backend/
 │   ├── app.py
-│   ├── model/
+│   ├── model_func/  *handle model
+│   ├── models/
+│   │   ├── flan_model
+│   │   ├── summ_model
+│   │   └── trans_model
 │   ├── utils/
 │   ├── static/
 │   │   ├── script.js

@@ -1,9 +1,8 @@
 from flask import Flask, request, jsonify, render_template
 from flask_cors import CORS
 from utils.file_reader import read_docx
-from model.summarizer import summ
-from model.qa import answer_question
-from model.translate import trans
+from model_func.summarizer import summ
+from model_func.translate import trans
 
 import sys
 sys.stdout.reconfigure(encoding='utf-8')
@@ -25,13 +24,6 @@ def upload_file():
         document_content = read_docx(file)
         return jsonify({"message": "File uploaded OK"})
     return jsonify({"error": "Only support file .docx"}), 400
-
-@app.route('/ask', methods=['POST'])
-def ask():
-    data = request.json
-    question = data.get("question", "")
-    answer = answer_question(document_content, question)
-    return jsonify({"answer": answer})
 
 @app.route('/trans', methods=['POST'])
 def translate():

@@ -1,3 +1,10 @@
 {
-  "device": "cuda"
+  "device": "cuda",
+  "model_dirs": {
+    "summarizer": "backend/models/summ_model",
+    "translator": "backend/models/trans_model"
+  },
+  "qa_model": "deepset/roberta-base-squad2",
+  "max_text_length": 512,
+  "max_summary_length": 512
 }

@@ -1,18 +1,24 @@
+"""
+Dog-brain Document Chatbot - Main Application
+"""
+import sys
 from flask import Flask, request, jsonify, render_template
 from flask_cors import CORS
-from utils.file_reader import read_docx
-from model_func.summarizer import summ
-from model_func.translate import trans
-from model_func.qa import answer_question
 
-import sys
+from utils.file_reader import read_file_auto
+from utils.document_manager import document_manager
+from model_func.model_manager import summarizer_model, translator_model, qa_model
+
+# Configure stdout encoding
 sys.stdout.reconfigure(encoding='utf-8')
 
+# Constants
+MAX_FILE_SIZE = 10 * 1024 * 1024  # 10MB
+ALLOWED_EXTENSIONS = {'.docx', '.pdf', '.txt'}
+
+# Flask app setup
 app = Flask(__name__, static_url_path='', static_folder='static', template_folder='templates')
 CORS(app)
-
-# Global variable để lưu nội dung tài liệu
-document_content = ""
 
 @app.route('/')
 def index():
@@ -20,102 +26,101 @@ def index():
 
 @app.route('/upload', methods=['POST'])
 def upload_file():
-    global document_content
+    """Upload and process a document file."""
     try:
         if 'file' not in request.files:
-            return jsonify({"error": "Không có file được tải lên"}), 400
-        
+            return jsonify({"error": "No file provided"}), 400
+
         file = request.files['file']
-        if file.filename == '':
-            return jsonify({"error": "Chưa chọn file"}), 400
-            
-        if file and file.filename.endswith('.docx'):
-            document_content = read_docx(file)
-            if document_content:
-                return jsonify({
-                    "message": "Tải file thành công!", 
-                    "content_length": len(document_content)
-                })
-            else:
-                return jsonify({"error": "Không thể đọc nội dung file"}), 400
-        
-        return jsonify({"error": "Chỉ hỗ trợ file .docx"}), 400
-    
+        if not file.filename:
+            return jsonify({"error": "No file selected"}), 400
+
+        # Validate file extension
+        if not any(file.filename.lower().endswith(ext) for ext in ALLOWED_EXTENSIONS):
+            return jsonify({"error": "Unsupported file type. Only .docx, .pdf, .txt allowed"}), 400
+
+        # Read and store document content
+        content = read_file_auto(file)
+        if content:
+            document_manager.content = content
+            return jsonify({
+                "message": "File uploaded successfully",
+                "content_length": len(content)
+            })
+        else:
+            return jsonify({"error": "Failed to read file content"}), 400
+
     except Exception as e:
-        return jsonify({"error": f"Lỗi khi xử lý file: {str(e)}"}), 500
+        return jsonify({"error": f"File processing error: {str(e)}"}), 500
 
 @app.route('/trans', methods=['POST'])
 def translate():
+    """Translate text using the translation model."""
     try:
-        data = request.json
+        data = request.get_json()
         if not data or 'question' not in data:
-            return jsonify({"error": "Thiếu dữ liệu câu hỏi"}), 400
-            
-        question = data.get("question", "")
-        if not question.strip():
-            return jsonify({"error": "Câu hỏi không được để trống"}), 400
-            
-        answer = trans(question)
-        return jsonify({"answer": answer})
-    
+            return jsonify({"error": "Missing text data"}), 400
+
+        text = data.get("question", "").strip()
+        if not text:
+            return jsonify({"error": "Text cannot be empty"}), 400
+
+        translation = translator_model.translate(text)
+        return jsonify({"answer": translation})
+
     except Exception as e:
-        return jsonify({"error": f"Lỗi khi dịch: {str(e)}"}), 500
+        return jsonify({"error": f"Translation failed: {str(e)}"}), 500
 
 @app.route('/summ', methods=['POST'])
 def summary():
+    """Summarize text or uploaded document."""
     try:
-        data = request.json
+        data = request.get_json()
         if not data or 'question' not in data:
-            return jsonify({"error": "Thiếu dữ liệu"}), 400
-            
-        question = data.get("question", "")
-        
-        # Nếu có document content, summarize nó thay vì question
-        if document_content:
-            answer = summ(document_content)
+            return jsonify({"error": "Missing data"}), 400
+
+        input_text = data.get("question", "").strip()
+
+        # If document is loaded, summarize it; otherwise summarize the input text
+        if document_manager.is_loaded:
+            summary_text = document_manager.content
         else:
-            if not question.strip():
-                return jsonify({"error": "Chưa có tài liệu để tóm tắt"}), 400
-            answer = summ(question)
-            
-        return jsonify({"answer": answer})
-    
+            if not input_text:
+                return jsonify({"error": "No document loaded or text provided"}), 400
+            summary_text = input_text
+
+        summary = summarizer_model.summarize(summary_text)
+        return jsonify({"answer": summary})
+
     except Exception as e:
-        return jsonify({"error": f"Lỗi khi tóm tắt: {str(e)}"}), 500
+        return jsonify({"error": f"Summarization failed: {str(e)}"}), 500
 
 @app.route('/ask', methods=['POST'])
 def ask_question():
-    global document_content
+    """Answer questions about the uploaded document."""
     try:
-        data = request.json
+        data = request.get_json()
         if not data or 'question' not in data:
-            return jsonify({"error": "Thiếu câu hỏi"}), 400
-            
-        question = data.get("question", "")
-        if not question.strip():
-            return jsonify({"error": "Câu hỏi không được để trống"}), 400
-            
-        if not document_content:
-            return jsonify({"error": "Vui lòng tải tài liệu lên trước khi hỏi"}), 400
-            
-        # Sử dụng model Q&A để trả lời dựa trên document content
-        answer = answer_question(document_content, question)
-        
-        if not answer or answer.strip() == "":
-            answer = "Xin lỗi, tôi không tìm thấy thông tin liên quan trong tài liệu."
-            
+            return jsonify({"error": "Missing question"}), 400
+
+        question = data.get("question", "").strip()
+        if not question:
+            return jsonify({"error": "Question cannot be empty"}), 400
+
+        if not document_manager.is_loaded:
+            return jsonify({"error": "Please upload a document first"}), 400
+
+        # Use QA model to answer based on document content
+        answer = qa_model.answer_question(document_manager.content, question)
         return jsonify({"answer": answer})
-    
+
     except Exception as e:
-        return jsonify({"error": f"Lỗi khi trả lời câu hỏi: {str(e)}"}), 500
+        return jsonify({"error": f"Question answering failed: {str(e)}"}), 500
 
 @app.route('/status', methods=['GET'])
 def get_status():
-    """Endpoint để kiểm tra trạng thái tài liệu đã tải"""
-    return jsonify({
-        "document_loaded": bool(document_content),
-        "document_length": len(document_content) if document_content else 0
-    })
+    """Check the status of the uploaded document."""
+    return jsonify(document_manager.get_status())
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)

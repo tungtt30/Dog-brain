@@ -151,15 +151,6 @@ def clean_text(text: str) -> str:
     return text
 
 def get_file_type(filename: str) -> str:
-    """
-    Xác định loại file từ tên file
-    
-    Args:
-        filename: Tên file
-        
-    Returns:
-        str: Loại file (docx, pdf, txt, unknown)
-    """
     if not filename:
         return "unknown"
     
@@ -176,13 +167,13 @@ def get_file_type(filename: str) -> str:
 
 def read_file_auto(file) -> Optional[str]:
     """
-    Tự động đọc file dựa trên extension
+    Read file
     
     Args:
-        file: File object từ Flask request
+        file: File object
         
     Returns:
-        str: Nội dung văn bản hoặc None nếu lỗi
+        str: Content or error
     """
     file_type = get_file_type(file.filename)
     

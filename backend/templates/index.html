@@ -3,17 +3,35 @@
   <head>
     <title>ChatBot</title>
     <link rel="stylesheet" href="./style.css" />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   </head>
   <body>
     <h1>💖 Cute Document ChatBot 🌸</h1>
-    <input type="file" id="fileInput" />
-    <button onclick="upload()">Upload</button>
-    <button onclick="summarize()">Summarize</button>
-    <button onclick="translat()">Translate</button>
-    <p id="summary"></p>
-    <input type="text" id="question" placeholder="Input something..." />
-    <!-- <button onclick="ask()">Click</button> -->
-    <p id="answer"></p>
+
+    <!-- File Upload Section -->
+    <div class="upload-section">
+      <input type="file" id="fileInput" accept=".docx" />
+      <button onclick="upload()">📁 Upload</button>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="actions-section">
+      <button onclick="summarize()">📄 Summerize</button>
+      <button onclick="translat()">🌐 Translate</button>
+    </div>
+
+    <!-- Question Input -->
+    <div class="question-section">
+      <input type="text" id="question" placeholder="Please ask..." />
+      <button id="askButton" onclick="ask()">🤖 Ask</button>
+    </div>
+
+    <!-- Answer Display -->
+    <div class="answer-section">
+      <p id="answer">Please upload .docx</p>
+    </div>
+
     <script src="./script.js"></script>
   </body>
 </html>

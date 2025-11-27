@@ -1,8 +1,11 @@
 import torch
 from transformers import T5Tokenizer, T5ForConditionalGeneration
+import json
 
+with open('backend/app_config.json', 'r', encoding='utf-8') as f:
+    data = json.load(f)
 
-device = "cuda"
+device = data["device"]
 model_dir = "backend/models/summ_model"
 tokenizer = T5Tokenizer.from_pretrained(model_dir)
 model = T5ForConditionalGeneration.from_pretrained(model_dir).to(device)
